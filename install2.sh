@@ -85,21 +85,25 @@ sudo -u "$USERNAME" venv/bin/pip install --break-system-packages -r requirements
 # === Yarn Build ===
 echo ">>> Baue Komponenten mit Yarn..."
 
+echo ">>> Baue Komponenten mit Yarn twitch-vod-chat"
 cd twitch-vod-chat
 sudo -u "$USERNAME" yarn install
 sudo -u "$USERNAME" yarn run buildlib
 cd ..
 
+echo ">>> Baue Komponenten mit Yarn client-vue"
 cd client-vue
 sudo -u "$USERNAME" yarn install
 sudo -u "$USERNAME" yarn run build
 cd ..
 
+echo ">>> Baue Komponenten mit Yarn server"
 cd server
 sudo -u "$USERNAME" yarn install
 sudo -u "$USERNAME" yarn run build
 cd ..
 
+echo ">>> Baue Komponenten mit Yarn twitch-chat-dumper"
 cd twitch-chat-dumper
 sudo -u "$USERNAME" yarn install
 sudo -u "$USERNAME" yarn run build
