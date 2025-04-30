@@ -33,6 +33,8 @@ echo "#  Dienstname: livestreamdvr                                  #"
 echo "#                                                             #"
 echo "###############################################################"
 echo ""
+echo "Version 1.0.0"
+echo ""
 
 # === Eingaben ===
 read -p "Bitte gib deine Domain ein (z.B. stream.example.com): " DOMAIN
