@@ -6,6 +6,12 @@ Dieses Skript richtet automatisch eine produktionsreife Umgebung ein – inklusi
 
 ---
 
+## 📖 Projektbeschreibung & Anleitung
+
+👉 [Zur Dokumentation auf wahke.lu](https://wahke.lu/portfolio-archive/lsdvr-install-scirpt/)
+
+---
+
 ## ✨ Features
 
 - 🧠 Distributionserkennung (Ubuntu, Debian, Fedora, CentOS, Arch, usw.)
@@ -35,4 +41,4 @@ Dieses Skript richtet automatisch eine produktionsreife Umgebung ein – inklusi
 ## 🚀 Installation
 
 ```bash
-curl -s https://wahke.lu/livestreamdvr-installer/install.sh | bash
+curl -s https://raw.githubusercontent.com/wahke/LSDVR-Installer/main/install.sh | bash

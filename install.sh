@@ -26,16 +26,17 @@ echo "#    - App-Verzeichnis: /opt/livestreamdvr                    #"
 echo "#    - Systemd-Service: livestreamdvr                         #"
 echo "#    - Zugriff: https://deine-domain.de                       #"
 echo "#                                                             #"
-echo "#  Weitere Infos: https://wahke.lu/livestreamdvr              #"
+echo "#  Projektseite:                                              #"
+echo "#  https://wahke.lu/portfolio-archive/lsdvr-install-scirpt/   #"
 echo "#                                                             #"
 echo "###############################################################"
 echo ""
 sleep 4
 
-# === Versionierung & Updateprüfung ===
+# === Versionierung & Auto-Update ===
 LOCAL_VERSION="1.0.0"
-VERSION_URL="https://wahke.lu/livestreamdvr-installer/version.txt"
-INSTALLER_URL="https://wahke.lu/livestreamdvr-installer/install.sh"
+VERSION_URL="https://raw.githubusercontent.com/wahke/LSDVR-Installer/main/version.txt"
+INSTALLER_URL="https://raw.githubusercontent.com/wahke/LSDVR-Installer/main/install.sh"
 SCRIPT_NAME="$(realpath "$0")"
 
 echo "Installerskript-Version: $LOCAL_VERSION"
@@ -44,18 +45,18 @@ echo "Prüfe auf Updates..."
 LATEST_VERSION=$(curl -s "$VERSION_URL" | tr -d '\r')
 
 if [ -z "$LATEST_VERSION" ]; then
-    echo "Konnte keine Versionsinformationen abrufen – fahre mit lokaler Version fort."
+    echo "Konnte Versionsinfo nicht abrufen – fahre mit lokaler Version fort."
 else
     if [ "$LOCAL_VERSION" != "$LATEST_VERSION" ]; then
         echo "Neue Version gefunden: $LATEST_VERSION"
-        echo "Aktualisiere Installationsskript automatisch..."
+        echo "Aktualisiere Skript automatisch..."
         curl -s "$INSTALLER_URL" -o "$SCRIPT_NAME"
         chmod +x "$SCRIPT_NAME"
-        echo "Neues Skript installiert. Starte erneut..."
+        echo "Installationsskript aktualisiert. Starte neu..."
         exec "$SCRIPT_NAME"
         exit 0
     else
-        echo "Installationsskript ist aktuell."
+        echo "Installerskript ist aktuell."
     fi
 fi
 echo ""
@@ -69,15 +70,14 @@ else
     exit 1
 fi
 
-# === Benutzer-Eingaben ===
+# === Eingaben vom Benutzer ===
 read -p "Bitte gib deine Domain ein (z.B. stream.example.com): " DOMAIN
 read -p "Bitte gib deine E-Mail-Adresse für Let's Encrypt ein: " EMAIL
 
-# === Grundlegende Variablen ===
 APP_DIR="/opt/livestreamdvr"
 PORT=8080
 
-# === Paketmanager und Update-Befehle festlegen ===
+# === Paketinstallation vorbereiten ===
 case "$DISTRO" in
     ubuntu|debian)
         PACKAGE_CMD="apt install -y"
@@ -105,7 +105,7 @@ case "$DISTRO" in
         ;;
 esac
 
-# === System aktualisieren und Pakete installieren ===
+# === System aktualisieren & Pakete installieren ===
 eval "$UPDATE_CMD"
 eval "$PACKAGE_CMD python3 python3-pip python3-venv git nginx ffmpeg curl $CERTBOT_PKG"
 
@@ -147,7 +147,6 @@ systemctl daemon-reload
 systemctl enable --now livestreamdvr
 
 # === NGINX konfigurieren ===
-NGINX_CONF=""
 if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
     NGINX_CONF="/etc/nginx/sites-available/livestreamdvr"
 else
@@ -169,20 +168,18 @@ server {
 }
 EOF
 
-# === Aktivieren nur bei Debian/Ubuntu notwendig ===
 if [[ "$DISTRO" == "ubuntu" || "$DISTRO" == "debian" ]]; then
     ln -sf /etc/nginx/sites-available/livestreamdvr /etc/nginx/sites-enabled/
 fi
 
 nginx -t && systemctl reload nginx
 
-# === Let's Encrypt Zertifikat einrichten ===
+# === SSL einrichten ===
 certbot --nginx -d "$DOMAIN" --non-interactive --agree-tos -m "$EMAIL"
 
 # === Abschlussmeldung ===
 echo ""
-echo "=== Installation abgeschlossen! ==="
-echo "LiveStreamDVR läuft jetzt unter:"
-echo "→ https://$DOMAIN"
-echo ""
-echo "Service verwalten: systemctl status livestreamdvr"
+echo "✅ Installation abgeschlossen!"
+echo "LiveStreamDVR ist erreichbar unter:"
+echo "🔗 https://$DOMAIN"
+echo "Service-Status prüfen mit: systemctl status livestreamdvr"
