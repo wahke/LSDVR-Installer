@@ -1,9 +1,12 @@
 #!/bin/bash
 set -e
 
-# === Root-Prüfung ===
-if [ "$EUID" -ne 0 ]; then
-  echo "Bitte führe dieses Skript mit Root-Rechten aus (z. B. per sudo)."
+# === Benutzer- und Sudo-Erkennung ===
+if [ "$EUID" -eq 0 ]; then
+  USERNAME="${SUDO_USER:-root}"
+  SUDO=""
+else
+  echo "Dieses Skript muss mit Root-Rechten gestartet werden (z. B. per sudo)."
   exit 1
 fi
 
@@ -35,7 +38,7 @@ echo ""
 read -p "Bitte gib deine Domain ein (z.B. stream.example.com): " DOMAIN
 read -p "Bitte gib deine E-Mail-Adresse für Let's Encrypt ein: " EMAIL
 
-# === Distro-Erkennung + Pakete installieren ===
+# === Distro-Erkennung ===
 echo ">>> Erkenne Distribution und installiere Abhängigkeiten..."
 
 install_packages_debian() {
@@ -62,44 +65,44 @@ else
   exit 1
 fi
 
-# === Zielverzeichnis vorbereiten ===
+# === Zielverzeichnis ===
 echo ">>> Erstelle Zielverzeichnis..."
 mkdir -p /opt/livestreamdvr
-chown "$SUDO_USER":"$SUDO_USER" /opt/livestreamdvr
+chown "$USERNAME":"$USERNAME" /opt/livestreamdvr
 cd /opt/livestreamdvr
 
 # === Repository klonen ===
 echo ">>> Klone LiveStreamDVR inkl. Submodules..."
-sudo -u "$SUDO_USER" git clone --recurse-submodules https://github.com/MrBrax/LiveStreamDVR.git .
-sudo -u "$SUDO_USER" git submodule update --init --recursive
+sudo -u "$USERNAME" git clone --recurse-submodules https://github.com/MrBrax/LiveStreamDVR.git .
+sudo -u "$USERNAME" git submodule update --init --recursive
 
-# === Python venv einrichten ===
-echo ">>> Erstelle Python-Umgebung..."
-sudo -u "$SUDO_USER" python3 -m venv venv
+# === Python venv ===
+echo ">>> Erstelle Python venv..."
+sudo -u "$USERNAME" python3 -m venv venv
 source venv/bin/activate
-sudo -u "$SUDO_USER" pip install -r requirements.txt
+sudo -u "$USERNAME" pip install -r requirements.txt
 
-# === Yarn Build-Schritte ===
-echo ">>> Baue Komponenten..."
+# === Yarn Build ===
+echo ">>> Baue Komponenten mit Yarn..."
 
 cd twitch-vod-chat
-sudo -u "$SUDO_USER" yarn install
-sudo -u "$SUDO_USER" yarn run buildlib
+sudo -u "$USERNAME" yarn install
+sudo -u "$USERNAME" yarn run buildlib
 cd ..
 
 cd client-vue
-sudo -u "$SUDO_USER" yarn install
-sudo -u "$SUDO_USER" yarn run build
+sudo -u "$USERNAME" yarn install
+sudo -u "$USERNAME" yarn run build
 cd ..
 
 cd server
-sudo -u "$SUDO_USER" yarn install
-sudo -u "$SUDO_USER" yarn run build
+sudo -u "$USERNAME" yarn install
+sudo -u "$USERNAME" yarn run build
 cd ..
 
 cd twitch-chat-dumper
-sudo -u "$SUDO_USER" yarn install
-sudo -u "$SUDO_USER" yarn run build
+sudo -u "$USERNAME" yarn install
+sudo -u "$USERNAME" yarn run build
 cd ..
 
 # === NGINX konfigurieren ===
@@ -121,12 +124,12 @@ EOF
 ln -sf /etc/nginx/sites-available/livestreamdvr /etc/nginx/sites-enabled/livestreamdvr
 nginx -t && systemctl reload nginx
 
-# === Zertifikat von Let's Encrypt ===
+# === Let's Encrypt ===
 echo ">>> Beantrage SSL-Zertifikat..."
 certbot --nginx -d "$DOMAIN" --email "$EMAIL" --agree-tos --non-interactive
 
-# === systemd-Dienst einrichten ===
-echo ">>> Richte livestreamdvr als Dienst ein..."
+# === systemd-Dienst ===
+echo ">>> Erstelle livestreamdvr systemd-Dienst..."
 
 cat > /etc/systemd/system/livestreamdvr.service <<EOF
 [Unit]
@@ -137,7 +140,7 @@ After=network.target
 WorkingDirectory=/opt/livestreamdvr/server
 ExecStart=$(which yarn) run start
 Restart=always
-User=$SUDO_USER
+User=$USERNAME
 Environment=NODE_ENV=production
 
 [Install]
