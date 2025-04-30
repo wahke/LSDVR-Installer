@@ -43,7 +43,7 @@ echo ">>> Erkenne Distribution und installiere Abhängigkeiten..."
 
 install_packages_debian() {
   apt update
-  apt install -y git python3 python3-venv python3-pip nginx certbot python3-certbot-nginx ffmpeg curl nodejs npm yarn
+  apt install -y git python3 python3-venv python3-pip nginx certbot python3-certbot-nginx ffmpeg curl nodejs npm yarn sudo
 }
 
 install_packages_fedora() {
