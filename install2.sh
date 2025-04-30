@@ -38,20 +38,20 @@ echo ""
 read -p "Bitte gib deine Domain ein (z.B. stream.example.com): " DOMAIN
 read -p "Bitte gib deine E-Mail-Adresse für Let's Encrypt ein: " EMAIL
 
-# === Distro-Erkennung ===
+# === Distro-Erkennung + Pakete ===
 echo ">>> Erkenne Distribution und installiere Abhängigkeiten..."
 
 install_packages_debian() {
   apt update
-  apt install -y git python3 python3-venv python3-pip nginx certbot python3-certbot-nginx ffmpeg curl nodejs npm yarn sudo
+  apt install -y sudo git python3 python3-venv python3-pip nginx certbot python3-certbot-nginx ffmpeg curl nodejs npm yarn
 }
 
 install_packages_fedora() {
-  dnf install -y git python3 python3-venv python3-pip nginx certbot python3-certbot-nginx ffmpeg curl nodejs npm yarn
+  dnf install -y sudo git python3 python3-venv python3-pip nginx certbot python3-certbot-nginx ffmpeg curl nodejs npm yarn
 }
 
 install_packages_arch() {
-  pacman -Sy --noconfirm git python python-virtualenv python-pip nginx certbot python-certbot-nginx ffmpeg curl nodejs npm yarn
+  pacman -Sy --noconfirm sudo git python python-virtualenv python-pip nginx certbot python-certbot-nginx ffmpeg curl nodejs npm yarn
 }
 
 if [ -f /etc/debian_version ]; then
@@ -80,7 +80,7 @@ sudo -u "$USERNAME" git submodule update --init --recursive
 echo ">>> Erstelle Python venv..."
 sudo -u "$USERNAME" python3 -m venv venv
 source venv/bin/activate
-sudo -u "$USERNAME" pip install -r requirements.txt
+sudo -u "$USERNAME" venv/bin/pip install --break-system-packages -r requirements.txt
 
 # === Yarn Build ===
 echo ">>> Baue Komponenten mit Yarn..."
