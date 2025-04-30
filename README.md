@@ -41,4 +41,4 @@ Dieses Skript richtet automatisch eine produktionsreife Umgebung ein – inklusi
 ## 🚀 Installation
 
 ```bash
-curl -s https://raw.githubusercontent.com/wahke/LSDVR-Installer/main/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/wahke/LSDVR-Installer/main/install.sh | sudo bash
