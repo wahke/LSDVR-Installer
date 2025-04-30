@@ -83,11 +83,9 @@ source venv/bin/activate
 sudo -u "$USERNAME" venv/bin/pip install --break-system-packages -r requirements.txt
 
 # === Yarn Build ===
-echo ">>> Baue Komponenten mit Yarn..."
-
 echo ">>> Baue Komponenten mit Yarn twitch-vod-chat"
 cd twitch-vod-chat
-sudo -u "$USERNAME" yarn install
+sudo -u "$UERNAME" yarn install
 sudo -u "$USERNAME" yarn run buildlib
 cd ..
 
